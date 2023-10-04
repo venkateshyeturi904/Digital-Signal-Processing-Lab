@@ -1,0 +1,185 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <complex.h>
+//#include <cmath.h>
+
+#define N 1500 // length of x[n]
+#define M 33 // length of h[n]
+#define L (N + M - 1) // length of y[n]
+#define M_PI 3.14159265358979323846
+#define f 4000
+#define fs 20000
+#define T 0.1
+#define T_sim 0.01
+
+float Wave[N];
+float FILT[M] = {0.0031, 0.0091, -0.0134, -0.0261, 0.0099, 0.0300, 0.0005, -0.0136,
+  	             0.0032, -0.0341, -0.0422, 0.0781, 0.1223, -0.0851, -0.2039, 0.0360, 0.2403,
+  	             0.0360, -0.2039, -0.0851, 0.1223, 0.0781, -0.0422, -0.0341, 0.0032, -0.0136,
+  	             0.0005,  0.0300,  0.0099,-0.0261,-0.0134,  0.0091,  0.0031};
+float conv_sig[L];
+float X[N], Y[L];
+
+float sine(float);
+
+void convolution(float x[], float h[], float y[]);
+void dft(float x[], float Xre[], float Xim[], float X[], int P);
+
+int main(void)
+{
+	printf("%d\n", sizeof(int));
+
+	float Xre[N], Xim[N], Yre[N], Yim[N];
+
+
+	int i = 0;
+	int j = 0;
+    printf("Our signals with %d Hz and %d Hz freq. : \n", f/2, f);
+	for (i = 0; i < N; i++) {
+		Wave[j] = 80*sine(2 * M_PI * f * ((float)i/(float)fs));
+		printf("%f, ", Wave[j]);
+		j++;
+		//i += (1.0 / (float)(N));
+	}
+	printf("\nOur convoluted signal is : \n");
+    convolution(Wave, FILT, conv_sig);
+
+    printf("\nDFT of input signal is : \n");
+    dft(Wave, Xre, Xim, X, N);
+    printf("\nDFT of convoluted signal is : \n");
+    dft(conv_sig, Yre, Yim, Y, L);
+
+    //print the output signal y[n]
+//    printf("Output signal y[n]:\n");
+//    for (int i = 0; i <= L-1; i++) {
+//        printf("%f, ", conv_sig[i]);
+//    }
+//    printf("\n");
+
+    return 0;
+}
+
+void convolution(float x[], float h[], float y[])
+{
+    int i, j, k;
+
+    // initialize the output signal to zero
+    for (i = 0; i < L; i++) {
+        y[i] = 0;
+    }
+
+    // perform the convolution
+    for (i = 0; i < L; i++) {
+        for (j = 0; j < M; j++) {
+            k = i - j;
+            if (k >= 0 && k < N) {
+                y[i] += x[k] * h[j];
+            }
+        }
+        printf("%f, ", y[i]);
+
+    }
+}
+
+float sine(float x) {
+	return sin(x) + sin (x/2.0);
+}
+
+void dft(float x[], float Xre[], float Xim[], float X[], int P)
+{
+    int k, n;
+    float w;
+
+    // compute the DFT of x[n]
+    for (k = 0; k < P; k++) {
+        Xre[k] = 0;
+        Xim[k] = 0;
+        for (n = 0; n < P; n++) {
+            w = 2 * M_PI * k * n / P;
+            Xre[k] += (x[n] * cos(w));
+            Xim[k] -= (x[n] * sin(w));
+        }
+        X[k] = sqrt(Xre[k]*Xre[k] + Xim[k]*Xim[k]);
+        printf("%f, ", X[k]);
+    }
+}
+
+
+
+
+
+______________________________________________________________________________________________________________________________________
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <complex.h>
+
+
+#define N 100 // length of x[n]
+#define M_PI 3.14159265358979323846
+#define f 800
+#define fs 8000
+
+float Wave[N];
+
+float X[N];
+
+float cosine(float);
+
+void dft(float x[], float Xre[], float Xim[], float X[], int P);
+
+int main(void)
+{
+	float Xre[N], Xim[N];
+
+
+	int i = 0;
+	int j = 0;
+    printf("Our signals with %d Hz freq. : \n", f);
+	for (i = 0; i < N; i++) {
+		Wave[j] = 80*cosine(2 * M_PI * f * ((float)i/(float)fs));
+		printf("%f, ", Wave[j]);
+		j++;
+
+	}
+
+    printf("\nDFT of input signal is : \n");
+    dft(Wave, Xre, Xim, X, N);
+
+
+    return 0;
+}
+
+float cosine(float x){
+	return cos(x);
+}
+
+void dft(float x[], float Xre[], float Xim[], float X[], int P)
+{
+    int k, n;
+    float w;
+
+    // compute the DFT of x[n]
+    for (k = 0; k < P; k++) {
+        Xre[k] = 0;
+        Xim[k] = 0;
+        for (n = 0; n < P; n++) {
+            w = 2 * M_PI * k * n / P;
+            Xre[k] += (x[n] * cos(w));
+            Xim[k] -= (x[n] * sin(w));
+        }
+        X[k] = sqrt(Xre[k]*Xre[k] + Xim[k]*Xim[k]);
+        printf("%f, ", X[k]);
+    }
+}
+
+
+_________________________________________________________________________________________________________________________________
+
+/tmp/EA8vfB0nfB.o
+Our signals with 800 Hz freq. : 
+80.000000, 64.721359, 24.721357, -24.721363, -64.721367, -80.000000, -64.721359, -24.721333, 24.721371, 64.721359, 80.000000, 64.721359, 24.721344, -24.721395, -64.721390, -80.000000, -64.721344, -24.721319, 24.721348, 64.721313, 80.000000, 64.721375, 24.721367, -24.721373, -64.721382, -80.000000, -64.721313, -24.721270, 24.721470, 64.721352, 80.000000, 64.721344, 24.721317, -24.721422, -64.721405, -80.000000, -64.721375, -24.721365, 24.721230, 64.721382, 80.000000, 64.721313, 24.721413, -24.721472, -64.721352, -80.000000, -64.721344, -24.721460, 24.721424, 64.721321, 80.000000, 64.721466, 24.721218, -24.721231, -64.721466, -80.000000, -64.721222, -24.721411, 24.721327, 64.721352, 80.000000, 64.721344, 24.721313, -24.721424, -64.721413, -80.000000, -64.721283, -24.721218, 24.721523, 64.721291, 80.000000, 64.721222, 24.721409, -24.721329, -64.721359, -80.000000, -64.721519, -24.721313, 24.721428, 64.721413, 80.000000, 64.721283, 24.721214, -24.721233, -64.721291, -80.000000, -64.721222, -24.721409, 24.721333, 64.721359, 80.000000, 64.721344, 24.721310, -24.721430, -64.721237, -80.000000, -64.721283, -24.721212, 24.721237, 64.721291, 
+DFT of input signal is : 
+0.000107, 0.000398, 0.000184, 0.000539, 0.000151, 0.000717, 0.000778, 0.000737, 0.000187, 0.000317, 4000.000000, 0.000470, 0.000130, 0.000405, 0.001537, 0.001291, 0.000962, 0.001232, 0.002021, 0.000563, 0.000489, 0.001299, 0.000952, 0.000759, 0.000436, 0.000659, 0.000962, 0.002761, 0.002580, 0.001940, 0.002960, 0.004054, 0.001593, 0.001891, 0.003502, 0.000783, 0.001591, 0.002314, 0.000620, 0.000345, 0.001211, 0.003364, 0.001045, 0.002173, 0.001164, 0.001237, 0.002954, 0.000329, 0.000436, 0.000439, 0.000489, 0.003497, 0.003203, 0.002447, 0.002181, 0.002542, 0.000870, 0.005741, 0.002957, 0.001702, 0.002702, 0.003140, 0.000882, 0.001728, 0.002126, 0.003507, 0.003503, 0.008529, 0.004182, 0.002755, 0.010787, 0.002331, 0.002969, 0.000825, 0.004818, 0.002003, 0.004437, 0.003256, 0.002073, 0.006535, 0.000402, 0.001692, 0.001857, 0.001619, 0.003105, 0.003287, 0.001266, 0.002534, 0.001232, 0.008665, 4000.000977, 0.007397, 0.002180, 0.001552, 0.004005, 0.004705, 0.008446, 0.005655, 0.004499, 0.002113, 

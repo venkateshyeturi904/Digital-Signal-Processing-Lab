@@ -1,0 +1,39 @@
+#include <cmath>
+#include <iostream>
+#include <stdio.h>
+
+typedef struct {
+    float real;
+    float imag;
+} complex;
+
+const float PI = 3.14159265358979323846;
+
+void dft(complex* input, complex* output, int N) {
+    for (int k = 0; k < N; k++) {
+        output[k].real = 0.0;
+        output[k].imag = 0.0;
+        for (int n = 0; n < N; n++) {
+            float twiddle_real = cos(2*PI*k*n/N);
+            float twiddle_imag = -sin(2*PI*k*n/N);
+            output[k].real += input[n].real * twiddle_real - input[n].imag * twiddle_imag;
+            output[k].imag += input[n].real * twiddle_imag + input[n].imag * twiddle_real;
+        }
+    }
+}
+
+int main() {
+    // Sample input signal
+    complex input[5] = {{1,0}, {2,0}, {3,0}, {4,0}, {5,0}};
+    // Allocate memory for output signal
+    complex* output = new complex[5];
+    // Compute DFT of input signal
+    dft(input, output, 5);
+    // Print output signal
+    for (int i = 0; i < 5; i++) {
+        std::cout << "Output[" << i << "]: " << output[i].real << " + " << output[i].imag << "i\n";
+    }
+    // Free memory allocated for output signal
+    delete[] output;
+    return 0;
+}
